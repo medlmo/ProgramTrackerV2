@@ -1,4 +1,6 @@
 import { programmes, projets, type Programme, type InsertProgramme, type Projet, type InsertProjet } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   // Programmes
@@ -22,143 +24,93 @@ export interface IStorage {
   createUser(user: any): Promise<any>;
 }
 
-export class MemStorage implements IStorage {
-  private programmes: Map<number, Programme>;
-  private projets: Map<number, Projet>;
-  private users: Map<number, any>;
-  private currentProgrammeId: number;
-  private currentProjetId: number;
-  private currentUserId: number;
-
-  constructor() {
-    this.programmes = new Map();
-    this.projets = new Map();
-    this.users = new Map();
-    this.currentProgrammeId = 1;
-    this.currentProjetId = 1;
-    this.currentUserId = 1;
-  }
-
+export class DatabaseStorage implements IStorage {
   // Programmes methods
   async getProgrammes(): Promise<Programme[]> {
-    return Array.from(this.programmes.values());
+    return await db.select().from(programmes);
   }
 
   async getProgramme(id: number): Promise<Programme | undefined> {
-    return this.programmes.get(id);
+    const [programme] = await db.select().from(programmes).where(eq(programmes.id, id));
+    return programme || undefined;
   }
 
   async createProgramme(insertProgramme: InsertProgramme): Promise<Programme> {
-    const id = this.currentProgrammeId++;
-    const now = new Date();
-    const programme: Programme = {
-      id,
-      nom: insertProgramme.nom,
-      secteur: insertProgramme.secteur,
-      objectifGlobal: insertProgramme.objectifGlobal,
-      partenaires: insertProgramme.partenaires || null,
-      montantGlobal: insertProgramme.montantGlobal,
-      participationRegion: insertProgramme.participationRegion,
-      createdAt: now,
-      updatedAt: now,
-    };
-    this.programmes.set(id, programme);
+    const [programme] = await db
+      .insert(programmes)
+      .values(insertProgramme)
+      .returning();
     return programme;
   }
 
   async updateProgramme(id: number, updateData: Partial<InsertProgramme>): Promise<Programme | undefined> {
-    const existingProgramme = this.programmes.get(id);
-    if (!existingProgramme) return undefined;
-
-    const updatedProgramme: Programme = {
-      ...existingProgramme,
-      ...updateData,
-      updatedAt: new Date(),
-    };
-    this.programmes.set(id, updatedProgramme);
-    return updatedProgramme;
+    const [programme] = await db
+      .update(programmes)
+      .set(updateData)
+      .where(eq(programmes.id, id))
+      .returning();
+    return programme || undefined;
   }
 
   async deleteProgramme(id: number): Promise<boolean> {
     // Also delete associated projets
-    const projetsToDelete = Array.from(this.projets.values()).filter(p => p.programmeId === id);
-    projetsToDelete.forEach(projet => this.projets.delete(projet.id));
+    await db.delete(projets).where(eq(projets.programmeId, id));
     
-    return this.programmes.delete(id);
+    const result = await db.delete(programmes).where(eq(programmes.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
   }
 
   // Projets methods
   async getProjets(): Promise<Projet[]> {
-    return Array.from(this.projets.values());
+    return await db.select().from(projets);
   }
 
   async getProjet(id: number): Promise<Projet | undefined> {
-    return this.projets.get(id);
+    const [projet] = await db.select().from(projets).where(eq(projets.id, id));
+    return projet || undefined;
   }
 
   async getProjetsByProgramme(programmeId: number): Promise<Projet[]> {
-    return Array.from(this.projets.values()).filter(p => p.programmeId === programmeId);
+    return await db.select().from(projets).where(eq(projets.programmeId, programmeId));
   }
 
   async createProjet(insertProjet: InsertProjet): Promise<Projet> {
-    const id = this.currentProjetId++;
-    const now = new Date();
-    const projet: Projet = {
-      id,
-      nom: insertProjet.nom,
-      programmeId: insertProjet.programmeId,
-      objectifs: insertProjet.objectifs,
-      partenaires: insertProjet.partenaires || null,
-      montantGlobal: insertProjet.montantGlobal,
-      participationRegion: insertProjet.participationRegion,
-      maitreOuvrage: insertProjet.maitreOuvrage,
-      provinces: insertProjet.provinces,
-      communes: insertProjet.communes,
-      indicateursQualitatifs: insertProjet.indicateursQualitatifs || null,
-      indicateursQuantitatifs: insertProjet.indicateursQuantitatifs || null,
-      etatAvancement: insertProjet.etatAvancement,
-      remarques: insertProjet.remarques || null,
-      createdAt: now,
-      updatedAt: now,
-    };
-    this.projets.set(id, projet);
+    const [projet] = await db
+      .insert(projets)
+      .values(insertProjet)
+      .returning();
     return projet;
   }
 
   async updateProjet(id: number, updateData: Partial<InsertProjet>): Promise<Projet | undefined> {
-    const existingProjet = this.projets.get(id);
-    if (!existingProjet) return undefined;
-
-    const updatedProjet: Projet = {
-      ...existingProjet,
-      ...updateData,
-      updatedAt: new Date(),
-    };
-    this.projets.set(id, updatedProjet);
-    return updatedProjet;
+    const [projet] = await db
+      .update(projets)
+      .set(updateData)
+      .where(eq(projets.id, id))
+      .returning();
+    return projet || undefined;
   }
 
   async deleteProjet(id: number): Promise<boolean> {
-    return this.projets.delete(id);
+    const result = await db.delete(projets).where(eq(projets.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
   }
 
   // Users methods (existing)
   async getUser(id: number): Promise<any | undefined> {
-    return this.users.get(id);
+    // For now, returning undefined as user management is not implemented with database
+    return undefined;
   }
 
   async getUserByUsername(username: string): Promise<any | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    // For now, returning undefined as user management is not implemented with database
+    return undefined;
   }
 
   async createUser(insertUser: any): Promise<any> {
-    const id = this.currentUserId++;
-    const user: any = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
+    // For now, returning the user object as user management is not implemented with database
+    return { ...insertUser, id: 1 };
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
