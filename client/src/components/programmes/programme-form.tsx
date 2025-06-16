@@ -26,8 +26,10 @@ export default function ProgrammeForm({ programme, onClose }: ProgrammeFormProps
       secteur: programme?.secteur || "",
       objectifGlobal: programme?.objectifGlobal || "",
       partenaires: programme?.partenaires || "",
-      montantGlobal: programme?.montantGlobal || "0",
-      participationRegion: programme?.participationRegion || "0",
+      montantGlobal: programme?.montantGlobal || "",
+      participationRegion: programme?.participationRegion || "",
+      dateDebut: programme?.dateDebut || undefined,
+      duree: programme?.duree || "",
     },
   });
 
@@ -115,9 +117,7 @@ export default function ProgrammeForm({ programme, onClose }: ProgrammeFormProps
               name="montantGlobal"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    Montant Global (€) <span className="text-destructive">*</span>
-                  </FormLabel>
+                  <FormLabel>Montant Global (€)</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -161,20 +161,56 @@ export default function ProgrammeForm({ programme, onClose }: ProgrammeFormProps
               />
             </div>
 
+            <FormField
+              control={form.control}
+              name="dateDebut"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Date de Début</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="date"
+                      {...field}
+                      value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
+                      onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : undefined)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="duree"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Durée</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Ex: 2 ans, 18 mois..."
+                      {...field}
+                      value={field.value || ''}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <div className="md:col-span-2">
               <FormField
                 control={form.control}
                 name="objectifGlobal"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      Objectif Global <span className="text-destructive">*</span>
-                    </FormLabel>
+                    <FormLabel>Objectif Global</FormLabel>
                     <FormControl>
                       <Textarea
                         rows={3}
                         placeholder="Décrivez l'objectif global du programme..."
                         {...field}
+                        value={field.value || ''}
                       />
                     </FormControl>
                     <FormMessage />

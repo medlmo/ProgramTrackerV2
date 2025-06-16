@@ -23,7 +23,7 @@ export default function Projets() {
 
   const filteredProjets = projets.filter((projet) => {
     const matchesSearch = projet.nom.toLowerCase().includes(searchValue.toLowerCase()) ||
-                         projet.objectifs.toLowerCase().includes(searchValue.toLowerCase());
+                         (projet.objectifs && projet.objectifs.toLowerCase().includes(searchValue.toLowerCase()));
     const matchesProgramme = !programmeFilter || programmeFilter === "tous" || projet.programmeId.toString() === programmeFilter;
     const matchesEtat = !etatFilter || etatFilter === "tous" || projet.etatAvancement === etatFilter;
     return matchesSearch && matchesProgramme && matchesEtat;

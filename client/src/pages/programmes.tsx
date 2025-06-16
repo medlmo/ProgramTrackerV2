@@ -20,7 +20,7 @@ export default function Programmes() {
 
   const filteredProgrammes = programmes.filter((programme) => {
     const matchesSearch = programme.nom.toLowerCase().includes(searchValue.toLowerCase()) ||
-                         programme.objectifGlobal.toLowerCase().includes(searchValue.toLowerCase());
+                         (programme.objectifGlobal && programme.objectifGlobal.toLowerCase().includes(searchValue.toLowerCase()));
     const matchesSecteur = !secteurFilter || secteurFilter === "tous" || programme.secteur === secteurFilter;
     return matchesSearch && matchesSecteur;
   });

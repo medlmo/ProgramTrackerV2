@@ -155,8 +155,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const totalProjets = projets.length;
       const projetsActifs = projets.filter(p => p.etatAvancement === "En cours").length;
       
-      const totalBudget = programmes.reduce((sum, p) => sum + parseFloat(p.montantGlobal), 0);
-      const totalParticipation = programmes.reduce((sum, p) => sum + parseFloat(p.participationRegion), 0);
+      const totalBudget = programmes.reduce((sum, p) => sum + parseFloat(p.montantGlobal || "0"), 0);
+      const totalParticipation = programmes.reduce((sum, p) => sum + parseFloat(p.participationRegion || "0"), 0);
       
       res.json({
         totalProgrammes,
