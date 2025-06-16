@@ -21,7 +21,7 @@ export default function Programmes() {
   const filteredProgrammes = programmes.filter((programme) => {
     const matchesSearch = programme.nom.toLowerCase().includes(searchValue.toLowerCase()) ||
                          programme.objectifGlobal.toLowerCase().includes(searchValue.toLowerCase());
-    const matchesSecteur = !secteurFilter || programme.secteur === secteurFilter;
+    const matchesSecteur = !secteurFilter || secteurFilter === "tous" || programme.secteur === secteurFilter;
     return matchesSearch && matchesSecteur;
   });
 
@@ -66,7 +66,7 @@ export default function Programmes() {
                       <SelectValue placeholder="Tous les secteurs" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Tous les secteurs</SelectItem>
+                      <SelectItem value="tous">Tous les secteurs</SelectItem>
                       {SECTEURS.map((secteur) => (
                         <SelectItem key={secteur} value={secteur}>
                           {secteur}

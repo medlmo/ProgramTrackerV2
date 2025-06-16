@@ -24,8 +24,8 @@ export default function Projets() {
   const filteredProjets = projets.filter((projet) => {
     const matchesSearch = projet.nom.toLowerCase().includes(searchValue.toLowerCase()) ||
                          projet.objectifs.toLowerCase().includes(searchValue.toLowerCase());
-    const matchesProgramme = !programmeFilter || projet.programmeId.toString() === programmeFilter;
-    const matchesEtat = !etatFilter || projet.etatAvancement === etatFilter;
+    const matchesProgramme = !programmeFilter || programmeFilter === "tous" || projet.programmeId.toString() === programmeFilter;
+    const matchesEtat = !etatFilter || etatFilter === "tous" || projet.etatAvancement === etatFilter;
     return matchesSearch && matchesProgramme && matchesEtat;
   });
 
@@ -75,7 +75,7 @@ export default function Projets() {
                       <SelectValue placeholder="Tous les programmes" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Tous les programmes</SelectItem>
+                      <SelectItem value="tous">Tous les programmes</SelectItem>
                       {programmes.map((programme) => (
                         <SelectItem key={programme.id} value={programme.id.toString()}>
                           {programme.nom}
@@ -93,7 +93,7 @@ export default function Projets() {
                       <SelectValue placeholder="Tous les états" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Tous les états</SelectItem>
+                      <SelectItem value="tous">Tous les états</SelectItem>
                       {ETATS_AVANCEMENT.map((etat) => (
                         <SelectItem key={etat} value={etat}>
                           {etat}
