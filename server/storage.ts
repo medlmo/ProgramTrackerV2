@@ -52,8 +52,13 @@ export class MemStorage implements IStorage {
     const id = this.currentProgrammeId++;
     const now = new Date();
     const programme: Programme = {
-      ...insertProgramme,
       id,
+      nom: insertProgramme.nom,
+      secteur: insertProgramme.secteur,
+      objectifGlobal: insertProgramme.objectifGlobal,
+      partenaires: insertProgramme.partenaires || null,
+      montantGlobal: insertProgramme.montantGlobal,
+      participationRegion: insertProgramme.participationRegion,
       createdAt: now,
       updatedAt: now,
     };
@@ -99,8 +104,20 @@ export class MemStorage implements IStorage {
     const id = this.currentProjetId++;
     const now = new Date();
     const projet: Projet = {
-      ...insertProjet,
       id,
+      nom: insertProjet.nom,
+      programmeId: insertProjet.programmeId,
+      objectifs: insertProjet.objectifs,
+      partenaires: insertProjet.partenaires || null,
+      montantGlobal: insertProjet.montantGlobal,
+      participationRegion: insertProjet.participationRegion,
+      maitreOuvrage: insertProjet.maitreOuvrage,
+      provinces: insertProjet.provinces,
+      communes: insertProjet.communes,
+      indicateursQualitatifs: insertProjet.indicateursQualitatifs || null,
+      indicateursQuantitatifs: insertProjet.indicateursQuantitatifs || null,
+      etatAvancement: insertProjet.etatAvancement,
+      remarques: insertProjet.remarques || null,
       createdAt: now,
       updatedAt: now,
     };

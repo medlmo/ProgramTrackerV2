@@ -88,15 +88,15 @@
 }
 
 .table-hover {
-  @apply hover:bg-muted/50 transition-colors;
+  @apply hover:bg-muted hover:bg-opacity-50 transition-colors;
 }
 
 .btn-primary {
-  @apply bg-primary hover:bg-primary/90 text-primary-foreground;
+  @apply bg-primary hover:bg-primary hover:bg-opacity-90 text-primary-foreground;
 }
 
 .btn-accent {
-  @apply bg-accent hover:bg-accent/90 text-accent-foreground;
+  @apply bg-accent hover:bg-accent hover:bg-opacity-90 text-accent-foreground;
 }
 
 .sidebar-active {
