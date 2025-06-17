@@ -55,7 +55,8 @@ export const PROVINCES = [
   "Chtouka-Aït Baha",
   "Inezgane-Aït Melloul",
   "Taroudant",
-  "Tiznit"
+  "Tiznit",
+  "Tata"
 ] as const;
 
 export const insertProjetSchema = createInsertSchema(projets).omit({

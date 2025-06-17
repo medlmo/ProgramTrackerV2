@@ -1,4 +1,4 @@
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogHeader, DialogTitle, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -10,8 +10,9 @@ import { useCreateProjet, useUpdateProjet } from "@/hooks/use-projets";
 import { insertProjetSchema, ETATS_AVANCEMENT, PROVINCES, type InsertProjet, type Projet, type Programme } from "@shared/schema";
 import { Save, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Controller } from "react-hook-form";
+import { Label as UILabel } from "@/components/ui/label";
+import { MultiSelect } from "@/components/ui/multi-select";
+import { communes } from "@/lib/communes";
 
 interface ProjetFormProps {
   projet?: Projet;
@@ -217,7 +218,7 @@ export function ProjetForm({ projet, programmes, onSubmit, onCancel }: ProjetFor
                             }
                           }}
                         />
-                        <Label htmlFor={province}>{province}</Label>
+                        <UILabel htmlFor={province}>{province}</UILabel>
                       </div>
                     ))}
                   </div>
@@ -226,22 +227,25 @@ export function ProjetForm({ projet, programmes, onSubmit, onCancel }: ProjetFor
               )}
             />
 
-            <Controller
-              control={form.control}
-              name="communes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Communes</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Entrez les communes concernées"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+            <div className="space-y-2">
+              <UILabel htmlFor="communes">Communes concernées</UILabel>
+              <Controller
+                name="communes"
+                control={form.control}
+                render={({ field }) => (
+                  <MultiSelect
+                    options={communes.map(commune => ({ label: commune, value: commune }))}
+                    selected={field.value ? field.value.split(", ") : []}
+                    onChange={(selected: string[]) => field.onChange(selected.join(", "))}
+                    placeholder="Sélectionner les communes..."
+                    className="w-full"
+                  />
+                )}
+              />
+              {form.formState.errors.communes && (
+                <p className="text-sm text-red-500">{form.formState.errors.communes.message}</p>
               )}
-            />
+            </div>
 
             <Controller
               control={form.control}
