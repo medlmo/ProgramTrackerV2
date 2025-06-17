@@ -171,14 +171,8 @@ export default function ProgrammeForm({ programme, onClose }: ProgrammeFormProps
                   <FormControl>
                     <Input
                       type="date"
-                      value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
-                      onChange={(e) => {
-                        if (e.target.value) {
-                          field.onChange(new Date(e.target.value));
-                        } else {
-                          field.onChange(null);
-                        }
-                      }}
+                      value={field.value ? (typeof field.value === 'string' ? field.value : new Date(field.value).toISOString().split('T')[0]) : ''}
+                      onChange={(e) => field.onChange(e.target.value || undefined)}
                     />
                   </FormControl>
                   <FormMessage />
