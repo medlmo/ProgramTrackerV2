@@ -148,6 +148,7 @@ export default function ProgrammeForm({ programme, onClose }: ProgrammeFormProps
                         step="0.01"
                         placeholder="0.00"
                         {...field}
+                        value={field.value || ''}
                       />
                     </FormControl>
                     {montantGlobal > 0 && (
@@ -170,9 +171,14 @@ export default function ProgrammeForm({ programme, onClose }: ProgrammeFormProps
                   <FormControl>
                     <Input
                       type="date"
-                      {...field}
                       value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
-                      onChange={(e) => field.onChange(e.target.value ? new Date(e.target.value) : undefined)}
+                      onChange={(e) => {
+                        if (e.target.value) {
+                          field.onChange(new Date(e.target.value));
+                        } else {
+                          field.onChange(null);
+                        }
+                      }}
                     />
                   </FormControl>
                   <FormMessage />

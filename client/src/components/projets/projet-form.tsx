@@ -36,6 +36,8 @@ export default function ProjetForm({ projet, programmes, onClose }: ProjetFormPr
       indicateursQuantitatifs: projet?.indicateursQuantitatifs || "",
       etatAvancement: projet?.etatAvancement || "",
       remarques: projet?.remarques || "",
+      dateDebut: projet?.dateDebut || undefined,
+      duree: projet?.duree || "",
     },
   });
 
@@ -322,6 +324,48 @@ export default function ProjetForm({ projet, programmes, onClose }: ProjetFormPr
               )}
             />
 
+            <FormField
+              control={form.control}
+              name="dateDebut"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Date de Début</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="date"
+                      value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
+                      onChange={(e) => {
+                        if (e.target.value) {
+                          field.onChange(new Date(e.target.value));
+                        } else {
+                          field.onChange(null);
+                        }
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="duree"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Durée</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Ex: 2 ans, 18 mois..."
+                      {...field}
+                      value={field.value || ''}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <div className="md:col-span-2">
               <FormField
                 control={form.control}
@@ -334,6 +378,7 @@ export default function ProjetForm({ projet, programmes, onClose }: ProjetFormPr
                         rows={3}
                         placeholder="Remarques additionnelles..."
                         {...field}
+                        value={field.value || ''}
                       />
                     </FormControl>
                     <FormMessage />
