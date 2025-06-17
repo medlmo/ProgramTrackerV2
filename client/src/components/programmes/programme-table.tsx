@@ -19,7 +19,7 @@ export default function ProgrammeTable({ programmes, isLoading, onEdit }: Progra
   const formatAmount = (amount: string) => {
     return new Intl.NumberFormat("fr-FR", {
       style: "currency",
-      currency: "EUR",
+      currency: "MAD",
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(parseFloat(amount));

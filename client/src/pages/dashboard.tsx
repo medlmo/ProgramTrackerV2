@@ -13,7 +13,7 @@ export default function Dashboard() {
   const formatAmount = (amount: number) => {
     return new Intl.NumberFormat("fr-FR", {
       style: "currency",
-      currency: "EUR",
+      currency: "MAD",
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount);
@@ -66,7 +66,7 @@ export default function Dashboard() {
           
           <StatsCard
             title="Budget Total"
-            value={stats?.totalBudget ? formatAmount(stats.totalBudget) : "0 €"}
+            value={stats?.totalBudget ? formatAmount(stats.totalBudget) : "0 MAD"}
             icon={Euro}
             iconColor="text-yellow-600"
             iconBgColor="bg-yellow-100 dark:bg-yellow-900/20"
@@ -74,7 +74,7 @@ export default function Dashboard() {
           
           <StatsCard
             title="Participation Région"
-            value={stats?.totalParticipation ? formatAmount(stats.totalParticipation) : "0 €"}
+            value={stats?.totalParticipation ? formatAmount(stats.totalParticipation) : "0 MAD"}
             icon={Handshake}
             iconColor="text-purple-600"
             iconBgColor="bg-purple-100 dark:bg-purple-900/20"
