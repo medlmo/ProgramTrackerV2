@@ -147,11 +147,11 @@ export default function Analyses() {
               <div className="space-y-4">
                 <div className="flex justify-between">
                   <span className="text-sm text-muted-foreground">Budget Total:</span>
-                  <span className="font-semibold">{stats?.totalBudget ? formatAmount(stats.totalBudget) : "0 €"}</span>
+                  <span className="font-semibold">{stats?.totalBudget ? formatAmount(stats.totalBudget) : "0 MAD"}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-muted-foreground">Participation Région:</span>
-                  <span className="font-semibold">{stats?.totalParticipation ? formatAmount(stats.totalParticipation) : "0 €"}</span>
+                  <span className="font-semibold">{stats?.totalParticipation ? formatAmount(stats.totalParticipation) : "0 MAD"}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-muted-foreground">Taux de Participation:</span>

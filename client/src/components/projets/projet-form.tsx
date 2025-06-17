@@ -175,7 +175,7 @@ export default function ProjetForm({ projet, programmes, onClose }: ProjetFormPr
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Montant Global (€) <span className="text-destructive">*</span>
+                    Montant Global (MAD) <span className="text-destructive">*</span>
                   </FormLabel>
                   <FormControl>
                     <Input
@@ -197,7 +197,7 @@ export default function ProjetForm({ projet, programmes, onClose }: ProjetFormPr
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Participation Région (€) <span className="text-destructive">*</span>
+                    Participation Région (MAD) <span className="text-destructive">*</span>
                   </FormLabel>
                   <FormControl>
                     <Input

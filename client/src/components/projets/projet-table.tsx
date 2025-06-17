@@ -92,9 +92,6 @@ export default function ProjetTable({ projets, isLoading, onEdit, getProgrammeNa
                         <div className="text-sm font-medium text-foreground">
                           {projet.nom}
                         </div>
-                        <div className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                          {projet.objectifs}
-                        </div>
                       </div>
                     </TableCell>
                     <TableCell>

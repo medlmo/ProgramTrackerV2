@@ -117,7 +117,7 @@ export default function ProgrammeForm({ programme, onClose }: ProgrammeFormProps
               name="montantGlobal"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Montant Global (€)</FormLabel>
+                  <FormLabel>Montant Global (MAD)</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -140,7 +140,7 @@ export default function ProgrammeForm({ programme, onClose }: ProgrammeFormProps
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Participation de la Région (€)
+                      Participation de la Région (MAD)
                     </FormLabel>
                     <FormControl>
                       <Input
