@@ -139,7 +139,7 @@ export default function ProgrammeForm({ programme, onClose }: ProgrammeFormProps
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Participation de la Région (€) <span className="text-destructive">*</span>
+                      Participation de la Région (€)
                     </FormLabel>
                     <FormControl>
                       <Input

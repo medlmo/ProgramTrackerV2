@@ -224,7 +224,7 @@ export default function ProjetForm({ projet, programmes, onClose }: ProjetFormPr
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Maître d'Ouvrage <span className="text-destructive">*</span>
+                    Maître d'Ouvrage
                   </FormLabel>
                   <FormControl>
                     <Input placeholder="Maître d'ouvrage..." {...field} />
@@ -240,7 +240,7 @@ export default function ProjetForm({ projet, programmes, onClose }: ProjetFormPr
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Provinces <span className="text-destructive">*</span>
+                    Provinces
                   </FormLabel>
                   <FormControl>
                     <Input placeholder="Provinces concernées..." {...field} />
@@ -257,7 +257,7 @@ export default function ProjetForm({ projet, programmes, onClose }: ProjetFormPr
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Communes <span className="text-destructive">*</span>
+                      Communes
                     </FormLabel>
                     <FormControl>
                       <Input placeholder="Communes concernées..." {...field} />

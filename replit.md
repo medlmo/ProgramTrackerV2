@@ -91,6 +91,7 @@ This project is a full-stack web application for managing economic development p
 ```
 Changelog:
 - June 17, 2025. Initial setup
+- June 17, 2025. Migration to Replit completed - Fixed date validation in forms, configured PostgreSQL database, all API endpoints working correctly
 ```
 
 ## User Preferences

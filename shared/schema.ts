@@ -54,7 +54,11 @@ export const insertProjetSchema = createInsertSchema(projets).omit({
   createdAt: true,
   updatedAt: true,
 }).extend({
-  dateDebut: z.string().optional().transform((val) => val ? new Date(val) : undefined),
+  dateDebut: z.union([
+    z.string().transform((val) => new Date(val)),
+    z.date(),
+    z.undefined()
+  ]).optional(),
 });
 
 export type InsertProgramme = z.infer<typeof insertProgrammeSchema>;
