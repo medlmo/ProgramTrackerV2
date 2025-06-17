@@ -125,6 +125,7 @@ export default function ProgrammeForm({ programme, onClose }: ProgrammeFormProps
                       step="0.01"
                       placeholder="0.00"
                       {...field}
+                      value={field.value || ''}
                     />
                   </FormControl>
                   <FormMessage />
@@ -231,6 +232,7 @@ export default function ProgrammeForm({ programme, onClose }: ProgrammeFormProps
                         rows={2}
                         placeholder="Listez les partenaires du programme..."
                         {...field}
+                        value={field.value || ''}
                       />
                     </FormControl>
                     <FormMessage />
