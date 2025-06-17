@@ -3,7 +3,7 @@ import { useProjets } from "@/hooks/use-projets";
 import { useProgrammes } from "@/hooks/use-programmes";
 import Header from "@/components/layout/header";
 import ProjetTable from "@/components/projets/projet-table";
-import ProjetForm from "@/components/projets/projet-form";
+import { ProjetForm } from "@/components/projets/projet-form";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
@@ -42,6 +42,10 @@ export default function Projets() {
   const handleFormClose = () => {
     setIsFormOpen(false);
     setEditingProjet(null);
+  };
+
+  const handleSubmit = (data: any) => {
+    handleFormClose();
   };
 
   const getProgrammeName = (programmeId: number) => {
@@ -129,11 +133,12 @@ export default function Projets() {
 
       {/* Form Dialog */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="max-w-4xl max-h-screen overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-screen overflow-y-auto" showCloseButton={false}>
           <ProjetForm
             projet={editingProjet}
             programmes={programmes}
-            onClose={handleFormClose}
+            onCancel={handleFormClose}
+            onSubmit={handleSubmit}
           />
         </DialogContent>
       </Dialog>

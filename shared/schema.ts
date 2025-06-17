@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, decimal, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, decimal, timestamp, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -25,7 +25,7 @@ export const projets = pgTable("projets", {
   montantGlobal: decimal("montant_global", { precision: 12, scale: 2 }),
   participationRegion: decimal("participation_region", { precision: 12, scale: 2 }),
   maitreOuvrage: text("maitre_ouvrage"),
-  provinces: text("provinces"),
+  provinces: jsonb("provinces").$type<string[]>(),
   communes: text("communes"),
   indicateursQualitatifs: text("indicateurs_qualitatifs"),
   indicateursQuantitatifs: text("indicateurs_quantitatifs"),
@@ -49,6 +49,15 @@ export const insertProgrammeSchema = createInsertSchema(programmes).omit({
   ]).optional(),
 });
 
+// Provinces de la région Souss-Massa
+export const PROVINCES = [
+  "Agadir-Ida-Ou-Tanane",
+  "Chtouka-Aït Baha",
+  "Inezgane-Aït Melloul",
+  "Taroudant",
+  "Tiznit"
+] as const;
+
 export const insertProjetSchema = createInsertSchema(projets).omit({
   id: true,
   createdAt: true,
@@ -59,6 +68,18 @@ export const insertProjetSchema = createInsertSchema(projets).omit({
     z.date(),
     z.undefined()
   ]).optional(),
+  provinces: z.array(z.string()).optional(),
+  objectifs: z.string().optional(),
+  partenaires: z.string().optional(),
+  montantGlobal: z.string().optional(),
+  participationRegion: z.string().optional(),
+  maitreOuvrage: z.string().optional(),
+  communes: z.string().optional(),
+  indicateursQualitatifs: z.string().optional(),
+  indicateursQuantitatifs: z.string().optional(),
+  etatAvancement: z.string(),
+  remarques: z.string().optional(),
+  duree: z.string().optional(),
 });
 
 export type InsertProgramme = z.infer<typeof insertProgrammeSchema>;

@@ -1,22 +1,26 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DialogHeader, DialogTitle, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCreateProjet, useUpdateProjet } from "@/hooks/use-projets";
-import { insertProjetSchema, ETATS_AVANCEMENT, type InsertProjet, type Projet, type Programme } from "@shared/schema";
+import { insertProjetSchema, ETATS_AVANCEMENT, PROVINCES, type InsertProjet, type Projet, type Programme } from "@shared/schema";
 import { Save, X } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Controller } from "react-hook-form";
 
 interface ProjetFormProps {
-  projet?: Projet | null;
-  programmes: Programme[];
-  onClose: () => void;
+  projet?: Projet;
+  programmes: { id: number; nom: string }[];
+  onSubmit: (data: InsertProjet) => void;
+  onCancel: () => void;
 }
 
-export default function ProjetForm({ projet, programmes, onClose }: ProjetFormProps) {
+export function ProjetForm({ projet, programmes, onSubmit, onCancel }: ProjetFormProps) {
   const createProjet = useCreateProjet();
   const updateProjet = useUpdateProjet();
 
@@ -27,28 +31,28 @@ export default function ProjetForm({ projet, programmes, onClose }: ProjetFormPr
       programmeId: projet?.programmeId || 0,
       objectifs: projet?.objectifs || "",
       partenaires: projet?.partenaires || "",
-      montantGlobal: projet?.montantGlobal || "0",
-      participationRegion: projet?.participationRegion || "0",
+      montantGlobal: projet?.montantGlobal?.toString() || "0",
+      participationRegion: projet?.participationRegion?.toString() || "0",
       maitreOuvrage: projet?.maitreOuvrage || "",
-      provinces: projet?.provinces || "",
+      provinces: projet?.provinces || [],
       communes: projet?.communes || "",
       indicateursQualitatifs: projet?.indicateursQualitatifs || "",
       indicateursQuantitatifs: projet?.indicateursQuantitatifs || "",
-      etatAvancement: projet?.etatAvancement || "",
+      etatAvancement: projet?.etatAvancement || "Planifié",
       remarques: projet?.remarques || "",
-      dateDebut: projet?.dateDebut || undefined,
+      dateDebut: projet?.dateDebut ? (typeof projet.dateDebut === 'string' ? new Date(projet.dateDebut) : projet.dateDebut) : undefined,
       duree: projet?.duree || "",
     },
   });
 
-  const onSubmit = async (data: InsertProjet) => {
+  const onSubmitForm = async (data: InsertProjet) => {
     try {
       if (projet) {
         await updateProjet.mutateAsync({ id: projet.id, data });
       } else {
         await createProjet.mutateAsync(data);
       }
-      onClose();
+      onSubmit(data);
     } catch (error) {
       // Error handling is done in the hooks
     }
@@ -62,49 +66,46 @@ export default function ProjetForm({ projet, programmes, onClose }: ProjetFormPr
   const percentage = montantGlobal > 0 ? ((participationRegion / montantGlobal) * 100).toFixed(1) : "0";
 
   return (
-    <div>
+    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" showCloseButton={false}>
       <DialogHeader>
         <DialogTitle className="flex items-center justify-between">
           {projet ? "Modifier le Projet" : "Nouveau Projet"}
-          <Button variant="ghost" size="sm" onClick={onClose}>
+          <Button variant="ghost" size="sm" onClick={onCancel}>
             <X className="h-4 w-4" />
           </Button>
         </DialogTitle>
       </DialogHeader>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="md:col-span-2">
-              <FormField
-                control={form.control}
-                name="nom"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Nom du Projet <span className="text-destructive">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input placeholder="Nom du projet..." {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+        <form onSubmit={form.handleSubmit(onSubmitForm as any)} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Controller
+              control={form.control}
+              name="nom"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nom du projet</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Entrez le nom du projet" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-            <FormField
+            <Controller
               control={form.control}
               name="programmeId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    Programme <span className="text-destructive">*</span>
-                  </FormLabel>
-                  <Select onValueChange={(value) => field.onChange(parseInt(value))} defaultValue={field.value.toString()}>
+                  <FormLabel>Programme</FormLabel>
+                  <Select
+                    value={field.value?.toString()}
+                    onValueChange={(value) => field.onChange(parseInt(value))}
+                  >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Sélectionner un programme" />
+                        <SelectValue placeholder="Sélectionnez un programme" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -120,18 +121,195 @@ export default function ProjetForm({ projet, programmes, onClose }: ProjetFormPr
               )}
             />
 
-            <FormField
+            <Controller
+              control={form.control}
+              name="objectifs"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Objectifs</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Décrivez les objectifs du projet"
+                      rows={3}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Controller
+              control={form.control}
+              name="montantGlobal"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Montant global (DH)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      placeholder="Entrez le montant global"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Controller
+              control={form.control}
+              name="participationRegion"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Participation de la région (DH)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      placeholder="Entrez la participation de la région"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Controller
+              control={form.control}
+              name="maitreOuvrage"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Maître d'ouvrage</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Entrez le maître d'ouvrage"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Controller
+              control={form.control}
+              name="provinces"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Provinces</FormLabel>
+                  <div className="grid grid-cols-2 gap-2">
+                    {PROVINCES.map((province) => (
+                      <div key={province} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={province}
+                          checked={field.value?.includes(province)}
+                          onCheckedChange={(checked) => {
+                            const currentProvinces = field.value || [];
+                            if (checked) {
+                              field.onChange([...currentProvinces, province]);
+                            } else {
+                              field.onChange(currentProvinces.filter((p) => p !== province));
+                            }
+                          }}
+                        />
+                        <Label htmlFor={province}>{province}</Label>
+                      </div>
+                    ))}
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Controller
+              control={form.control}
+              name="communes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Communes</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Entrez les communes concernées"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Controller
+              control={form.control}
+              name="partenaires"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Partenaires</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Listez les partenaires du projet"
+                      rows={3}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Controller
+              control={form.control}
+              name="indicateursQualitatifs"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Indicateurs qualitatifs</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Décrivez les indicateurs qualitatifs"
+                      rows={3}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Controller
+              control={form.control}
+              name="indicateursQuantitatifs"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Indicateurs quantitatifs</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Décrivez les indicateurs quantitatifs"
+                      rows={3}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Controller
               control={form.control}
               name="etatAvancement"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    État d'Avancement <span className="text-destructive">*</span>
-                  </FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormLabel>État d'avancement</FormLabel>
+                  <Select
+                    value={field.value}
+                    onValueChange={field.onChange}
+                  >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Sélectionner un état" />
+                        <SelectValue placeholder="Sélectionnez l'état d'avancement" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -147,157 +325,16 @@ export default function ProjetForm({ projet, programmes, onClose }: ProjetFormPr
               )}
             />
 
-            <div className="md:col-span-2">
-              <FormField
-                control={form.control}
-                name="objectifs"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Objectifs <span className="text-destructive">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Textarea
-                        rows={3}
-                        placeholder="Décrivez les objectifs du projet..."
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <FormField
+            <Controller
               control={form.control}
-              name="montantGlobal"
+              name="remarques"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    Montant Global (MAD) <span className="text-destructive">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      placeholder="0.00"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="participationRegion"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Participation Région (MAD) <span className="text-destructive">*</span>
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      placeholder="0.00"
-                      {...field}
-                    />
-                  </FormControl>
-                  {montantGlobal > 0 && (
-                    <p className="text-sm text-muted-foreground">
-                      Participation: {percentage}% du montant global
-                    </p>
-                  )}
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="maitreOuvrage"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Maître d'Ouvrage
-                  </FormLabel>
-                  <FormControl>
-                    <Input placeholder="Maître d'ouvrage..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="provinces"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Provinces
-                  </FormLabel>
-                  <FormControl>
-                    <Input placeholder="Provinces concernées..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="md:col-span-2">
-              <FormField
-                control={form.control}
-                name="communes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Communes
-                    </FormLabel>
-                    <FormControl>
-                      <Input placeholder="Communes concernées..." {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="md:col-span-2">
-              <FormField
-                control={form.control}
-                name="partenaires"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Partenaires</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        rows={2}
-                        placeholder="Listez les partenaires du projet..."
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <FormField
-              control={form.control}
-              name="indicateursQualitatifs"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Indicateurs Qualitatifs</FormLabel>
+                  <FormLabel>Remarques</FormLabel>
                   <FormControl>
                     <Textarea
+                      placeholder="Ajoutez des remarques"
                       rows={3}
-                      placeholder="Indicateurs qualitatifs..."
                       {...field}
                     />
                   </FormControl>
@@ -306,35 +343,17 @@ export default function ProjetForm({ projet, programmes, onClose }: ProjetFormPr
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="indicateursQuantitatifs"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Indicateurs Quantitatifs</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      rows={3}
-                      placeholder="Indicateurs quantitatifs..."
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
+            <Controller
               control={form.control}
               name="dateDebut"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Date de Début</FormLabel>
+                  <FormLabel>Date de début</FormLabel>
                   <FormControl>
                     <Input
                       type="date"
-                      value={field.value ? (typeof field.value === 'string' ? field.value : new Date(field.value).toISOString().split('T')[0]) : ''}
-                      onChange={(e) => field.onChange(e.target.value || undefined)}
+                      value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
+                      onChange={e => field.onChange(e.target.value ? new Date(e.target.value) : undefined)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -342,7 +361,7 @@ export default function ProjetForm({ projet, programmes, onClose }: ProjetFormPr
               )}
             />
 
-            <FormField
+            <Controller
               control={form.control}
               name="duree"
               render={({ field }) => (
@@ -350,40 +369,18 @@ export default function ProjetForm({ projet, programmes, onClose }: ProjetFormPr
                   <FormLabel>Durée</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Ex: 2 ans, 18 mois..."
+                      placeholder="Entrez la durée du projet"
                       {...field}
-                      value={field.value || ''}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
-            <div className="md:col-span-2">
-              <FormField
-                control={form.control}
-                name="remarques"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Remarques</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        rows={3}
-                        placeholder="Remarques additionnelles..."
-                        {...field}
-                        value={field.value || ''}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
           </div>
 
-          <div className="flex items-center justify-end space-x-4 pt-6 border-t border-border">
-            <Button type="button" variant="outline" onClick={onClose}>
+          <div className="flex justify-end space-x-2">
+            <Button type="button" variant="outline" onClick={onCancel}>
               Annuler
             </Button>
             <Button type="submit" disabled={isSubmitting} className="btn-primary">
@@ -393,6 +390,6 @@ export default function ProjetForm({ projet, programmes, onClose }: ProjetFormPr
           </div>
         </form>
       </Form>
-    </div>
+    </DialogContent>
   );
 }

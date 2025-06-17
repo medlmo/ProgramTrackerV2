@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Eye, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -5,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { useDeleteProjet } from "@/hooks/use-projets";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { ProjetDetails } from "./projet-details";
 import type { Projet, Programme } from "@shared/schema";
 
 interface ProjetTableProps {
@@ -15,8 +17,9 @@ interface ProjetTableProps {
   getProgrammeName: (programmeId: number) => string;
 }
 
-export default function ProjetTable({ projets, isLoading, onEdit, getProgrammeName }: ProjetTableProps) {
+export default function ProjetTable({ projets, programmes, isLoading, onEdit, getProgrammeName }: ProjetTableProps) {
   const deleteProjet = useDeleteProjet();
+  const [selectedProjet, setSelectedProjet] = useState<Projet | null>(null);
 
   const formatAmount = (amount: string) => {
     return new Intl.NumberFormat("fr-FR", {
@@ -59,111 +62,122 @@ export default function ProjetTable({ projets, isLoading, onEdit, getProgrammeNa
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Liste des Projets</CardTitle>
-      </CardHeader>
-      <CardContent className="p-0">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Projet</TableHead>
-                <TableHead>Programme</TableHead>
-                <TableHead>Maître d'Ouvrage</TableHead>
-                <TableHead>Montant Global</TableHead>
-                <TableHead>Participation Région</TableHead>
-                <TableHead>État</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {projets.length === 0 ? (
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>Liste des Projets</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                    Aucun projet trouvé
-                  </TableCell>
+                  <TableHead>Projet</TableHead>
+                  <TableHead>Programme</TableHead>
+                  <TableHead>Maître d'Ouvrage</TableHead>
+                  <TableHead>Montant Global</TableHead>
+                  <TableHead>Participation Région</TableHead>
+                  <TableHead>État</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
-              ) : (
-                projets.map((projet) => (
-                  <TableRow key={projet.id} className="table-hover">
-                    <TableCell>
-                      <div>
-                        <div className="text-sm font-medium text-foreground">
-                          {projet.nom}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm text-foreground">
-                        {getProgrammeName(projet.programmeId)}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm text-foreground">
-                        {projet.maitreOuvrage}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm font-medium text-foreground">
-                        {formatAmount(projet.montantGlobal)}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm font-medium text-primary">
-                        {formatAmount(projet.participationRegion)}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={getEtatColor(projet.etatAvancement)}>
-                        {projet.etatAvancement}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-2">
-                        <Button variant="ghost" size="sm">
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => onEdit(projet)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Êtes-vous sûr de vouloir supprimer ce projet ? Cette action est irréversible.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Annuler</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleDelete(projet.id)}
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                              >
-                                Supprimer
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
+              </TableHeader>
+              <TableBody>
+                {projets.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                      Aucun projet trouvé
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </CardContent>
-    </Card>
+                ) : (
+                  projets.map((projet) => (
+                    <TableRow key={projet.id} className="table-hover">
+                      <TableCell>
+                        <div>
+                          <div className="text-sm font-medium text-foreground">
+                            {projet.nom}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm text-foreground">
+                          {getProgrammeName(projet.programmeId)}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm text-foreground">
+                          {projet.maitreOuvrage}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm font-medium text-foreground">
+                          {projet.montantGlobal ? formatAmount(projet.montantGlobal) : "Non défini"}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm font-medium text-primary">
+                          {projet.participationRegion ? formatAmount(projet.participationRegion) : "Non définie"}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={getEtatColor(projet.etatAvancement)}>
+                          {projet.etatAvancement}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setSelectedProjet(projet)}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => onEdit(projet)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Cette action est irréversible. Cela supprimera définitivement le projet.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Annuler</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDelete(projet.id)}>
+                                  Supprimer
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+
+      {selectedProjet && (
+        <ProjetDetails
+          projet={selectedProjet}
+          programmeName={getProgrammeName(selectedProjet.programmeId)}
+          onClose={() => setSelectedProjet(null)}
+        />
+      )}
+    </>
   );
 }

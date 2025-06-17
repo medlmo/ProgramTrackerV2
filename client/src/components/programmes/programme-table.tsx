@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Eye, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -5,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { useDeleteProgramme } from "@/hooks/use-programmes";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { ProgrammeDetails } from "./programme-details";
 import type { Programme } from "@shared/schema";
 
 interface ProgrammeTableProps {
@@ -15,8 +17,10 @@ interface ProgrammeTableProps {
 
 export default function ProgrammeTable({ programmes, isLoading, onEdit }: ProgrammeTableProps) {
   const deleteProgramme = useDeleteProgramme();
+  const [selectedProgramme, setSelectedProgramme] = useState<Programme | null>(null);
 
-  const formatAmount = (amount: string) => {
+  const formatAmount = (amount: string | null) => {
+    if (!amount) return "Non défini";
     return new Intl.NumberFormat("fr-FR", {
       style: "currency",
       currency: "MAD",
@@ -60,109 +64,118 @@ export default function ProgrammeTable({ programmes, isLoading, onEdit }: Progra
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Liste des Programmes</CardTitle>
-      </CardHeader>
-      <CardContent className="p-0">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Programme</TableHead>
-                <TableHead>Secteur</TableHead>
-                <TableHead>Partenaires</TableHead>
-                <TableHead>Montant Global</TableHead>
-                <TableHead>Participation Région</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {programmes.length === 0 ? (
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>Liste des Programmes</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                    Aucun programme trouvé
-                  </TableCell>
+                  <TableHead>Programme</TableHead>
+                  <TableHead>Secteur</TableHead>
+                  <TableHead>Partenaires</TableHead>
+                  <TableHead>Montant Global</TableHead>
+                  <TableHead>Participation Région</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
-              ) : (
-                programmes.map((programme) => (
-                  <TableRow key={programme.id} className="table-hover">
-                    <TableCell>
-                      <div>
-                        <div className="text-sm font-medium text-foreground">
-                          {programme.nom}
-                        </div>
-                        <div className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                          {programme.objectifGlobal}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={getSecteurColor(programme.secteur)}>
-                        {programme.secteur}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="max-w-xs">
-                      <div className="text-sm text-foreground truncate">
-                        {programme.partenaires || "Non spécifié"}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm font-medium text-foreground">
-                        {formatAmount(programme.montantGlobal)}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm font-medium text-primary">
-                        {formatAmount(programme.participationRegion)}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-2">
-                        <Button variant="ghost" size="sm">
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => onEdit(programme)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Êtes-vous sûr de vouloir supprimer ce programme ? Cette action est irréversible
-                                et supprimera également tous les projets associés.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Annuler</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleDelete(programme.id)}
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                              >
-                                Supprimer
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
+              </TableHeader>
+              <TableBody>
+                {programmes.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                      Aucun programme trouvé
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </CardContent>
-    </Card>
+                ) : (
+                  programmes.map((programme) => (
+                    <TableRow key={programme.id} className="table-hover">
+                      <TableCell>
+                        <div>
+                          <div className="text-sm font-medium text-foreground">
+                            {programme.nom}
+                          </div>
+                          <div className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                            {programme.objectifGlobal}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={getSecteurColor(programme.secteur)}>
+                          {programme.secteur}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="max-w-xs">
+                        <div className="text-sm text-foreground truncate">
+                          {programme.partenaires || "Non spécifié"}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm font-medium text-foreground">
+                          {programme.montantGlobal ? formatAmount(programme.montantGlobal) : "Non défini"}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm font-medium text-primary">
+                          {programme.participationRegion ? formatAmount(programme.participationRegion) : "Non définie"}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setSelectedProgramme(programme)}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => onEdit(programme)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Cette action est irréversible. Cela supprimera définitivement le programme.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Annuler</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDelete(programme.id)}>
+                                  Supprimer
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+
+      {selectedProgramme && (
+        <ProgrammeDetails
+          programme={selectedProgramme}
+          onClose={() => setSelectedProgramme(null)}
+        />
+      )}
+    </>
   );
 }

@@ -100,7 +100,7 @@ export default function Programmes() {
 
       {/* Form Dialog */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="max-w-2xl max-h-screen overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-screen overflow-y-auto" showCloseButton={false}>
           <ProgrammeForm
             programme={editingProgramme}
             onClose={handleFormClose}
