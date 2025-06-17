@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Download, Filter } from "lucide-react";
 import { SECTEURS } from "@shared/schema";
+import * as XLSX from "xlsx";
 
 export default function Programmes() {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -38,6 +39,43 @@ export default function Programmes() {
   const handleFormClose = () => {
     setIsFormOpen(false);
     setEditingProgramme(null);
+  };
+
+  const handleExport = () => {
+    // Préparer les données pour l'export
+    const exportData = filteredProgrammes.map(programme => ({
+      "Nom du programme": programme.nom,
+      "Secteur": programme.secteur,
+      "Date de début": programme.dateDebut ? new Date(programme.dateDebut).toLocaleDateString() : "Non définie",
+      "Durée": programme.duree || "Non définie",
+      "Montant global (DH)": programme.montantGlobal || "0",
+      "Participation de la région (DH)": programme.participationRegion || "0",
+      "Objectif global": programme.objectifGlobal || "Non défini",
+      "Partenaires": programme.partenaires || "Non définis"
+    }));
+
+    // Créer un nouveau classeur
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(exportData);
+
+    // Ajuster la largeur des colonnes
+    const colWidths = [
+      { wch: 30 }, // Nom du programme
+      { wch: 20 }, // Secteur
+      { wch: 15 }, // Date de début
+      { wch: 15 }, // Durée
+      { wch: 20 }, // Montant global
+      { wch: 25 }, // Participation de la région
+      { wch: 40 }, // Objectif global
+      { wch: 30 }  // Partenaires
+    ];
+    ws['!cols'] = colWidths;
+
+    // Ajouter la feuille au classeur
+    XLSX.utils.book_append_sheet(wb, ws, "Programmes");
+
+    // Générer le fichier Excel
+    XLSX.writeFile(wb, "programmes.xlsx");
   };
 
   return (
@@ -81,7 +119,7 @@ export default function Programmes() {
                   <Filter className="mr-2 h-4 w-4" />
                   Filtres avancés
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={handleExport}>
                   <Download className="mr-2 h-4 w-4" />
                   Exporter
                 </Button>
