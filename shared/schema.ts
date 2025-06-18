@@ -47,7 +47,20 @@ export const insertProgrammeSchema = createInsertSchema(programmes).omit({
     z.date(),
     z.undefined()
   ]).optional(),
-});
+  montantGlobal: z.string().optional(),
+  participationRegion: z.string().optional(),
+}).refine(
+  (data) => {
+    if (!data.participationRegion || !data.montantGlobal) return true;
+    const participation = parseFloat(data.participationRegion);
+    const montant = parseFloat(data.montantGlobal);
+    return participation <= montant;
+  },
+  {
+    message: "La contribution de la région ne peut pas dépasser le montant total",
+    path: ["participationRegion"]
+  }
+);
 
 // Provinces de la région Souss-Massa
 export const PROVINCES = [
@@ -81,7 +94,18 @@ export const insertProjetSchema = createInsertSchema(projets).omit({
   etatAvancement: z.string(),
   remarques: z.string().optional(),
   duree: z.string().optional(),
-});
+}).refine(
+  (data) => {
+    if (!data.participationRegion || !data.montantGlobal) return true;
+    const participation = parseFloat(data.participationRegion);
+    const montant = parseFloat(data.montantGlobal);
+    return participation <= montant;
+  },
+  {
+    message: "La contribution de la région ne peut pas dépasser le montant total",
+    path: ["participationRegion"]
+  }
+);
 
 export type InsertProgramme = z.infer<typeof insertProgrammeSchema>;
 export type Programme = typeof programmes.$inferSelect;

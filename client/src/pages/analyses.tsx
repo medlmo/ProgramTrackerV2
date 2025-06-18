@@ -188,12 +188,6 @@ export default function Analyses() {
                   <span className="text-sm text-muted-foreground">Projets Actifs:</span>
                   <span className="font-semibold">{stats?.projetsActifs || 0}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Moyenne par Programme:</span>
-                  <span className="font-semibold">
-                    {stats?.totalProgrammes ? (stats.totalProjets / stats.totalProgrammes).toFixed(1) : "0"} projets
-                  </span>
-                </div>
               </div>
             </CardContent>
           </Card>

@@ -153,6 +153,23 @@ export default function ProgrammeForm({ programme, onClose }: ProgrammeFormProps
                         placeholder="0.00"
                         {...field}
                         value={field.value || ''}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          field.onChange(value);
+                          const montantGlobal = form.getValues("montantGlobal");
+                          if (value && montantGlobal) {
+                            const participation = parseFloat(value);
+                            const montant = parseFloat(montantGlobal);
+                            if (participation > montant) {
+                              form.setError("participationRegion", {
+                                type: "manual",
+                                message: "La contribution de la région ne peut pas dépasser le montant total"
+                              });
+                            } else {
+                              form.clearErrors("participationRegion");
+                            }
+                          }
+                        }}
                       />
                     </FormControl>
                     {montantGlobal > 0 && (

@@ -161,25 +161,52 @@ export function ProjetForm({ projet, programmes, onSubmit, onCancel }: ProjetFor
               )}
             />
 
-            <Controller
-              control={form.control}
-              name="participationRegion"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Contribution de la région (DH)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      placeholder="Entrez la contribution de la région"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="md:col-span-2">
+              <FormField
+                control={form.control}
+                name="participationRegion"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Contribution de la Région (MAD)
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder="0.00"
+                        {...field}
+                        value={field.value || ''}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          field.onChange(value);
+                          const montantGlobal = form.getValues("montantGlobal");
+                          if (value && montantGlobal) {
+                            const participation = parseFloat(value);
+                            const montant = parseFloat(montantGlobal);
+                            if (participation > montant) {
+                              form.setError("participationRegion", {
+                                type: "manual",
+                                message: "La contribution de la région ne peut pas dépasser le montant total"
+                              });
+                            } else {
+                              form.clearErrors("participationRegion");
+                            }
+                          }
+                        }}
+                      />
+                    </FormControl>
+                    {montantGlobal > 0 && (
+                      <p className="text-sm text-muted-foreground">
+                        Contribution: {percentage}% du montant global
+                      </p>
+                    )}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <Controller
               control={form.control}
