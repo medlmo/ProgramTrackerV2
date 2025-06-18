@@ -62,7 +62,7 @@ export default function Projets() {
       "État d'avancement": projet.etatAvancement,
       "Maître d'ouvrage": projet.maitreOuvrage || "Non défini",
       "Montant global (DH)": projet.montantGlobal || "0",
-      "Participation de la région (DH)": projet.participationRegion || "0",
+      "Contribution de la région (DH)": projet.participationRegion || "0",
       "Date de début": projet.dateDebut ? new Date(projet.dateDebut).toLocaleDateString() : "Non définie",
       "Durée": projet.duree || "Non définie",
       "Objectifs": projet.objectifs || "Non définis",

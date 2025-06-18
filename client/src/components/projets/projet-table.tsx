@@ -76,7 +76,7 @@ export default function ProjetTable({ projets, programmes, isLoading, onEdit, ge
                   <TableHead>Programme</TableHead>
                   <TableHead>Maître d'Ouvrage</TableHead>
                   <TableHead>Montant Global</TableHead>
-                  <TableHead>Participation Région</TableHead>
+                  <TableHead>Contribution Région</TableHead>
                   <TableHead>État</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>

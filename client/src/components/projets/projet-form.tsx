@@ -166,13 +166,13 @@ export function ProjetForm({ projet, programmes, onSubmit, onCancel }: ProjetFor
               name="participationRegion"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Participation de la région (DH)</FormLabel>
+                  <FormLabel>Contribution de la région (DH)</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
                       min="0"
                       step="0.01"
-                      placeholder="Entrez la participation de la région"
+                      placeholder="Entrez la contribution de la région"
                       {...field}
                     />
                   </FormControl>
@@ -257,7 +257,7 @@ export function ProjetForm({ projet, programmes, onSubmit, onCancel }: ProjetFor
                   <MultiSelect
                     options={partenaires.map(partenaire => ({ label: partenaire, value: partenaire }))}
                     selected={field.value ? field.value.split(", ") : []}
-                    onChange={(selected) => field.onChange(selected.join(", "))}
+                    onChange={(selected: string[]) => field.onChange(selected.join(", "))}
                     placeholder="Sélectionner les partenaires..."
                     className="w-full"
                   />

@@ -77,17 +77,27 @@ export function ProjetDetails({ projet, programmeName, onClose }: ProjetDetailsP
             <div className="bg-card rounded-lg p-4 shadow-sm">
               <h3 className="text-lg font-semibold mb-3 text-primary">Financement</h3>
               <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Montant global</span>
-                  <span className="font-medium text-primary">
-                    {projet.montantGlobal ? formatAmount(projet.montantGlobal) : "Non défini"}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Participation de la région</span>
-                  <span className="font-medium text-primary">
-                    {projet.participationRegion ? formatAmount(projet.participationRegion) : "Non définie"}
-                  </span>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="font-medium text-sm text-muted-foreground">Montant global</h4>
+                    <p className="text-lg font-semibold">
+                      {projet.montantGlobal ? formatAmount(projet.montantGlobal) : "Non défini"}
+                    </p>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-sm text-muted-foreground">Contribution de la région</h4>
+                    <p className="text-lg font-semibold">
+                      {projet.participationRegion ? formatAmount(projet.participationRegion) : "Non définie"}
+                    </p>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-sm text-muted-foreground">Pourcentage de contribution</h4>
+                    <p className="text-lg font-semibold">
+                      {projet.montantGlobal && projet.participationRegion
+                        ? `${((Number(projet.participationRegion) / Number(projet.montantGlobal)) * 100).toFixed(2)}%`
+                        : "Non défini"}
+                    </p>
+                  </div>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">Date de début</span>

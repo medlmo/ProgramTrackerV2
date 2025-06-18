@@ -76,9 +76,9 @@ export default function ProgrammeTable({ programmes, isLoading, onEdit }: Progra
                 <TableRow>
                   <TableHead>Programme</TableHead>
                   <TableHead>Secteur</TableHead>
-                  <TableHead>Partenaires</TableHead>
+                  <TableHead>Date de début</TableHead>
                   <TableHead>Montant Global</TableHead>
-                  <TableHead>Participation Région</TableHead>
+                  <TableHead>Contribution Région</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -107,9 +107,9 @@ export default function ProgrammeTable({ programmes, isLoading, onEdit }: Progra
                           {programme.secteur}
                         </Badge>
                       </TableCell>
-                      <TableCell className="max-w-xs">
-                        <div className="text-sm text-foreground truncate">
-                          {programme.partenaires || "Non spécifié"}
+                      <TableCell>
+                        <div className="text-sm text-foreground">
+                          {programme.dateDebut ? new Date(programme.dateDebut).toLocaleDateString() : "Non définie"}
                         </div>
                       </TableCell>
                       <TableCell>

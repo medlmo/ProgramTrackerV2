@@ -49,7 +49,7 @@ export default function Programmes() {
       "Date de début": programme.dateDebut ? new Date(programme.dateDebut).toLocaleDateString() : "Non définie",
       "Durée": programme.duree || "Non définie",
       "Montant global (DH)": programme.montantGlobal || "0",
-      "Participation de la région (DH)": programme.participationRegion || "0",
+      "Contribution de la région (DH)": programme.participationRegion || "0",
       "Objectif global": programme.objectifGlobal || "Non défini",
       "Partenaires": programme.partenaires || "Non définis"
     }));

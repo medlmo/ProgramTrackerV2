@@ -73,7 +73,7 @@ export default function Dashboard() {
           />
           
           <StatsCard
-            title="Participation Région"
+            title="Contribution Région"
             value={stats?.totalParticipation ? formatAmount(stats.totalParticipation) : "0 MAD"}
             icon={Handshake}
             iconColor="text-purple-600"

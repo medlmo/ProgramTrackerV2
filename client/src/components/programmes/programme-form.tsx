@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -9,6 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useCreateProgramme, useUpdateProgramme } from "@/hooks/use-programmes";
 import { insertProgrammeSchema, SECTEURS, type InsertProgramme, type Programme } from "@shared/schema";
 import { Save, X } from "lucide-react";
+import { MultiSelect } from "@/components/ui/multi-select";
+import { partenaires } from "@/lib/partenaires";
 
 interface ProgrammeFormProps {
   programme?: Programme | null;
@@ -140,7 +143,7 @@ export default function ProgrammeForm({ programme, onClose }: ProgrammeFormProps
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Participation de la Région (MAD)
+                      Contribution de la Région (MAD)
                     </FormLabel>
                     <FormControl>
                       <Input
@@ -154,7 +157,7 @@ export default function ProgrammeForm({ programme, onClose }: ProgrammeFormProps
                     </FormControl>
                     {montantGlobal > 0 && (
                       <p className="text-sm text-muted-foreground">
-                        Participation: {percentage}% du montant global
+                        Contribution: {percentage}% du montant global
                       </p>
                     )}
                     <FormMessage />
@@ -228,11 +231,12 @@ export default function ProgrammeForm({ programme, onClose }: ProgrammeFormProps
                   <FormItem>
                     <FormLabel>Partenaires</FormLabel>
                     <FormControl>
-                      <Textarea
-                        rows={2}
-                        placeholder="Listez les partenaires du programme..."
-                        {...field}
-                        value={field.value || ''}
+                      <MultiSelect
+                        options={partenaires.map(partenaire => ({ label: partenaire, value: partenaire }))}
+                        selected={field.value ? field.value.split(", ") : []}
+                        onChange={(selected: string[]) => field.onChange(selected.join(", "))}
+                        placeholder="Sélectionner les partenaires..."
+                        className="w-full"
                       />
                     </FormControl>
                     <FormMessage />
