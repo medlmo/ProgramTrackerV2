@@ -13,6 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label as UILabel } from "@/components/ui/label";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { communes } from "@/lib/communes";
+import { partenaires } from "@/lib/partenaires";
 
 interface ProjetFormProps {
   projet?: Projet;
@@ -247,23 +248,25 @@ export function ProjetForm({ projet, programmes, onSubmit, onCancel }: ProjetFor
               )}
             </div>
 
-            <Controller
-              control={form.control}
-              name="partenaires"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Partenaires</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Listez les partenaires du projet"
-                      rows={3}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+            <div className="space-y-2">
+              <UILabel htmlFor="partenaires">Partenaires</UILabel>
+              <Controller
+                name="partenaires"
+                control={form.control}
+                render={({ field }) => (
+                  <MultiSelect
+                    options={partenaires.map(partenaire => ({ label: partenaire, value: partenaire }))}
+                    selected={field.value ? field.value.split(", ") : []}
+                    onChange={(selected) => field.onChange(selected.join(", "))}
+                    placeholder="Sélectionner les partenaires..."
+                    className="w-full"
+                  />
+                )}
+              />
+              {form.formState.errors.partenaires && (
+                <p className="text-sm text-red-500">{form.formState.errors.partenaires.message}</p>
               )}
-            />
+            </div>
 
             <Controller
               control={form.control}
