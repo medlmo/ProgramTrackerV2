@@ -115,10 +115,13 @@ export type Projet = typeof projets.$inferSelect;
 // Secteurs constants
 export const SECTEURS = [
   "Agriculture",
-  "Industrie", 
+  "Aquaculture", 
   "Tourisme",
+  "Industrie",
+  "Logistique",
+  "Pêche maritime",
   "Artisanat",
-  "Services",
+  "Emploi",
   "Infrastructure",
   "Formation"
 ] as const;

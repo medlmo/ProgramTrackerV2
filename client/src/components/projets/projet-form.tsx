@@ -6,14 +6,17 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useCreateProjet, useUpdateProjet } from "@/hooks/use-projets";
 import { insertProjetSchema, ETATS_AVANCEMENT, PROVINCES, type InsertProjet, type Projet, type Programme } from "@shared/schema";
-import { Save, X } from "lucide-react";
+import { Save, X, Check, ChevronsUpDown } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label as UILabel } from "@/components/ui/label";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { communes } from "@/lib/communes";
 import { partenaires } from "@/lib/partenaires";
+import { cn } from "@/lib/utils";
 
 interface ProjetFormProps {
   projet?: Projet;
@@ -215,9 +218,12 @@ export function ProjetForm({ projet, programmes, onSubmit, onCancel }: ProjetFor
                 <FormItem>
                   <FormLabel>Maître d'ouvrage</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="Entrez le maître d'ouvrage"
-                      {...field}
+                    <MultiSelect
+                      options={partenaires.map(partenaire => ({ label: partenaire, value: partenaire }))}
+                      selected={field.value ? [field.value] : []}
+                      onChange={(selected: string[]) => field.onChange(selected[0] || "")}
+                      placeholder="Sélectionner le maître d'ouvrage..."
+                      className="w-full"
                     />
                   </FormControl>
                   <FormMessage />
