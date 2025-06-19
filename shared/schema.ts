@@ -2,6 +2,19 @@ import { pgTable, text, serial, integer, decimal, timestamp, jsonb } from "drizz
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// User roles enum
+export const USER_ROLES = ["admin", "editeur", "decideur"] as const;
+export type UserRole = typeof USER_ROLES[number];
+
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  username: text("username").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  role: text("role").notNull().$type<UserRole>(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const programmes = pgTable("programmes", {
   id: serial("id").primaryKey(),
   nom: text("nom").notNull(),
@@ -106,6 +119,28 @@ export const insertProjetSchema = createInsertSchema(projets).omit({
     path: ["participationRegion"]
   }
 );
+
+// User schemas
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  passwordHash: true,
+}).extend({
+  password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
+  role: z.enum(USER_ROLES, {
+    errorMap: () => ({ message: "Le rôle doit être admin, editeur ou decideur" })
+  })
+});
+
+export const loginSchema = z.object({
+  username: z.string().min(1, "Le nom d'utilisateur est requis"),
+  password: z.string().min(1, "Le mot de passe est requis")
+});
+
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type User = typeof users.$inferSelect;
+export type LoginRequest = z.infer<typeof loginSchema>;
 
 export type InsertProgramme = z.infer<typeof insertProgrammeSchema>;
 export type Programme = typeof programmes.$inferSelect;

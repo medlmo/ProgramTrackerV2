@@ -1,12 +1,117 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertProgrammeSchema, insertProjetSchema } from "@shared/schema";
+import { insertProgrammeSchema, insertProjetSchema, insertUserSchema, loginSchema, users } from "@shared/schema";
 import { z } from "zod";
+import { authenticateUser, requireAuth, requireEditor, requireViewer, requireAdmin, hashPassword, type AuthenticatedRequest } from "./auth";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Authentication routes
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const { username, password } = loginSchema.parse(req.body);
+      const user = await authenticateUser(username, password);
+      
+      if (!user) {
+        return res.status(401).json({ message: "Nom d'utilisateur ou mot de passe incorrect" });
+      }
+
+      req.session.userId = user.id;
+      req.session.username = user.username;
+      req.session.role = user.role;
+
+      res.json({ 
+        message: "Connexion réussie",
+        user: {
+          id: user.id,
+          username: user.username,
+          role: user.role
+        }
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Données invalides", errors: error.errors });
+      }
+      res.status(500).json({ message: "Erreur lors de la connexion" });
+    }
+  });
+
+  app.post("/api/auth/logout", (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        return res.status(500).json({ message: "Erreur lors de la déconnexion" });
+      }
+      res.json({ message: "Déconnexion réussie" });
+    });
+  });
+
+  app.get("/api/auth/me", requireAuth, (req, res) => {
+    const authReq = req as AuthenticatedRequest;
+    res.json({
+      user: authReq.user
+    });
+  });
+
+  // User management routes (admin only)
+  app.post("/api/users", requireAdmin, async (req, res) => {
+    try {
+      const userData = insertUserSchema.parse(req.body);
+      const passwordHash = await hashPassword(userData.password);
+      
+      const newUser = await db.insert(users).values({
+        username: userData.username,
+        passwordHash,
+        role: userData.role
+      }).returning({
+        id: users.id,
+        username: users.username,
+        role: users.role,
+        createdAt: users.createdAt
+      });
+
+      res.status(201).json(newUser[0]);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Données invalides", errors: error.errors });
+      }
+      res.status(500).json({ message: "Erreur lors de la création de l'utilisateur" });
+    }
+  });
+
+  app.get("/api/users", requireAdmin, async (req, res) => {
+    try {
+      const allUsers = await db.select({
+        id: users.id,
+        username: users.username,
+        role: users.role,
+        createdAt: users.createdAt
+      }).from(users);
+      res.json(allUsers);
+    } catch (error) {
+      res.status(500).json({ message: "Erreur lors de la récupération des utilisateurs" });
+    }
+  });
+
+  app.delete("/api/users/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const authReq = req as AuthenticatedRequest;
+      
+      if (id === authReq.user?.id) {
+        return res.status(400).json({ message: "Vous ne pouvez pas supprimer votre propre compte" });
+      }
+
+      await db.delete(users).where(eq(users.id, id));
+      res.json({ message: "Utilisateur supprimé avec succès" });
+    } catch (error) {
+      res.status(500).json({ message: "Erreur lors de la suppression de l'utilisateur" });
+    }
+  });
+
   // Programmes routes
-  app.get("/api/programmes", async (req, res) => {
+  app.get("/api/programmes", requireViewer, async (req, res) => {
     try {
       const programmes = await storage.getProgrammes();
       res.json(programmes);
@@ -15,7 +120,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/programmes/:id", async (req, res) => {
+  app.get("/api/programmes/:id", requireViewer, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const programme = await storage.getProgramme(id);
@@ -28,7 +133,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/programmes", async (req, res) => {
+  app.post("/api/programmes", requireEditor, async (req, res) => {
     try {
       const validatedData = insertProgrammeSchema.parse(req.body);
       const programme = await storage.createProgramme(validatedData);
@@ -41,7 +146,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/programmes/:id", async (req, res) => {
+  app.put("/api/programmes/:id", requireEditor, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const validatedData = insertProgrammeSchema.partial().parse(req.body);
@@ -58,7 +163,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/programmes/:id", async (req, res) => {
+  app.delete("/api/programmes/:id", requireEditor, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const deleted = await storage.deleteProgramme(id);
@@ -72,7 +177,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Projets routes
-  app.get("/api/projets", async (req, res) => {
+  app.get("/api/projets", requireViewer, async (req, res) => {
     try {
       const { programmeId } = req.query;
       let projets;
@@ -89,7 +194,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/projets/:id", async (req, res) => {
+  app.get("/api/projets/:id", requireViewer, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const projet = await storage.getProjet(id);
@@ -102,7 +207,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/projets", async (req, res) => {
+  app.post("/api/projets", requireEditor, async (req, res) => {
     try {
       const validatedData = insertProjetSchema.parse(req.body);
       const projet = await storage.createProjet(validatedData);
@@ -115,7 +220,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/projets/:id", async (req, res) => {
+  app.put("/api/projets/:id", requireEditor, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const validatedData = insertProjetSchema.partial().parse(req.body);
@@ -132,7 +237,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/projets/:id", async (req, res) => {
+  app.delete("/api/projets/:id", requireEditor, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const deleted = await storage.deleteProjet(id);
@@ -146,7 +251,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Statistics endpoint
-  app.get("/api/stats", async (req, res) => {
+  app.get("/api/stats", requireViewer, async (req, res) => {
     try {
       const programmes = await storage.getProgrammes();
       const projets = await storage.getProjets();
