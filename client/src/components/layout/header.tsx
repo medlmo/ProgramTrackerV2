@@ -1,6 +1,7 @@
-import { Search, Plus } from "lucide-react";
+import { Search, Plus, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useLocation } from "wouter";
 
 interface HeaderProps {
   title: string;
@@ -19,12 +20,25 @@ export default function Header({
   searchValue = "",
   onSearchChange,
 }: HeaderProps) {
+  const [, setLocation] = useLocation();
+
   return (
     <header className="bg-card border-b border-border px-6 py-4">
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-foreground">{title}</h2>
-          <p className="text-muted-foreground mt-1">{description}</p>
+        <div className="flex items-center space-x-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setLocation("/")}
+            className="hover:bg-accent"
+            title="Retour à l'accueil"
+          >
+            <Home className="h-5 w-5" />
+          </Button>
+          <div>
+            <h2 className="text-2xl font-bold text-foreground">{title}</h2>
+            <p className="text-muted-foreground mt-1">{description}</p>
+          </div>
         </div>
         <div className="flex items-center space-x-4">
           {onSearchChange && (

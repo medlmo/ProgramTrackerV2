@@ -6,8 +6,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useCreateProjet, useUpdateProjet } from "@/hooks/use-projets";
 import { insertProjetSchema, ETATS_AVANCEMENT, PROVINCES, type InsertProjet, type Projet, type Programme } from "@shared/schema";
 import { Save, X, Check, ChevronsUpDown } from "lucide-react";
@@ -72,13 +70,18 @@ export function ProjetForm({ projet, programmes, onSubmit, onCancel }: ProjetFor
 
   return (
     <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" showCloseButton={false}>
+      <DialogTitle className="sr-only">
+        {projet ? "Modifier le Projet" : "Nouveau Projet"}
+      </DialogTitle>
       <DialogHeader>
-        <DialogTitle className="flex items-center justify-between">
-          {projet ? "Modifier le Projet" : "Nouveau Projet"}
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">
+            {projet ? "Modifier le Projet" : "Nouveau Projet"}
+          </h2>
           <Button variant="ghost" size="sm" onClick={onCancel}>
             <X className="h-4 w-4" />
           </Button>
-        </DialogTitle>
+        </div>
       </DialogHeader>
 
       <Form {...form}>
