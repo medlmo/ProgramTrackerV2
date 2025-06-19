@@ -29,15 +29,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const checkAuth = async () => {
     try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
       const response = await fetch('/api/auth/me', {
-        credentials: 'include' as RequestCredentials // Include cookies in requests
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        credentials: 'include' as RequestCredentials
       });
       if (response.ok) {
         const data = await response.json();
         setUser(data.user);
+      } else {
+        localStorage.removeItem('authToken');
       }
     } catch (error) {
       console.error('Auth check failed:', error);
+      localStorage.removeItem('authToken');
     } finally {
       setLoading(false);
     }
@@ -50,12 +62,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include' as RequestCredentials, // Include cookies in requests
+        credentials: 'include' as RequestCredentials,
         body: JSON.stringify({ username, password }),
       });
 
       if (response.ok) {
         const data = await response.json();
+        localStorage.setItem('authToken', data.token);
         setUser(data.user);
         return true;
       }
@@ -70,11 +83,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await fetch('/api/auth/logout', { 
         method: 'POST',
-        credentials: 'include' as RequestCredentials // Include cookies in requests
+        credentials: 'include' as RequestCredentials
       });
     } catch (error) {
       console.error('Logout failed:', error);
     } finally {
+      localStorage.removeItem('authToken');
       setUser(null);
     }
   };

@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertProgrammeSchema, insertProjetSchema, insertUserSchema, loginSchema, users } from "@shared/schema";
 import { z } from "zod";
-import { authenticateUser, requireAuth, requireEditor, requireViewer, requireAdmin, hashPassword, type AuthenticatedRequest } from "./auth";
+import { authenticateUser, requireAuth, requireEditor, requireViewer, requireAdmin, hashPassword, generateToken, type AuthenticatedRequest } from "./auth";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 
@@ -18,12 +18,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Nom d'utilisateur ou mot de passe incorrect" });
       }
 
-      req.session.userId = user.id;
-      req.session.username = user.username;
-      req.session.role = user.role;
+      const token = generateToken(user);
+      
+      // Set cookie for browser compatibility
+      res.cookie('authToken', token, {
+        httpOnly: false, // Allow JavaScript access for frontend
+        secure: false, // Set to true in production with HTTPS
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        sameSite: 'lax'
+      });
 
       res.json({ 
         message: "Connexion réussie",
+        token,
         user: {
           id: user.id,
           username: user.username,
@@ -40,12 +47,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/auth/logout", (req, res) => {
-    req.session.destroy((err) => {
-      if (err) {
-        return res.status(500).json({ message: "Erreur lors de la déconnexion" });
-      }
-      res.json({ message: "Déconnexion réussie" });
-    });
+    res.clearCookie('authToken');
+    res.json({ message: "Déconnexion réussie" });
   });
 
   app.get("/api/auth/me", requireAuth, (req, res) => {

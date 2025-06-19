@@ -33,7 +33,11 @@ export default function Users() {
   const { data: users = [], isLoading } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
+      const token = localStorage.getItem('authToken');
       const response = await fetch("/api/users", {
+        headers: {
+          ...(token ? { "Authorization": `Bearer ${token}` } : {})
+        },
         credentials: 'include' as RequestCredentials
       });
       if (!response.ok) throw new Error("Erreur lors du chargement des utilisateurs");
@@ -44,9 +48,13 @@ export default function Users() {
 
   const createUserMutation = useMutation({
     mutationFn: async (userData: typeof formData) => {
+      const token = localStorage.getItem('authToken');
       const response = await fetch("/api/users", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          ...(token ? { "Authorization": `Bearer ${token}` } : {})
+        },
         credentials: 'include' as RequestCredentials,
         body: JSON.stringify(userData)
       });
@@ -69,8 +77,12 @@ export default function Users() {
 
   const deleteUserMutation = useMutation({
     mutationFn: async (userId: number) => {
+      const token = localStorage.getItem('authToken');
       const response = await fetch(`/api/users/${userId}`, {
         method: "DELETE",
+        headers: {
+          ...(token ? { "Authorization": `Bearer ${token}` } : {})
+        },
         credentials: 'include' as RequestCredentials
       });
       if (!response.ok) {

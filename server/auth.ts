@@ -1,16 +1,11 @@
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 import { db } from './db';
 import { users, type UserRole } from '@shared/schema';
 import { eq } from 'drizzle-orm';
 
-declare module 'express-session' {
-  interface SessionData {
-    userId?: number;
-    username?: string;
-    role?: UserRole;
-  }
-}
+const JWT_SECRET = process.env.JWT_SECRET || 'your-jwt-secret-change-in-production';
 
 export interface AuthenticatedRequest extends Request {
   user?: {
@@ -51,15 +46,44 @@ export async function authenticateUser(username: string, password: string) {
   };
 }
 
+export function generateToken(user: { id: number; username: string; role: UserRole }): string {
+  return jwt.sign(
+    { userId: user.id, username: user.username, role: user.role },
+    JWT_SECRET,
+    { expiresIn: '24h' }
+  );
+}
+
+export function verifyToken(token: string): { userId: number; username: string; role: UserRole } | null {
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    return {
+      userId: decoded.userId,
+      username: decoded.username,
+      role: decoded.role
+    };
+  } catch (error) {
+    return null;
+  }
+}
+
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
-  if (!req.session || !req.session.userId) {
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : req.cookies?.authToken;
+  
+  if (!token) {
     return res.status(401).json({ message: 'Authentification requise' });
   }
 
+  const decoded = verifyToken(token);
+  if (!decoded) {
+    return res.status(401).json({ message: 'Token invalide' });
+  }
+
   (req as AuthenticatedRequest).user = {
-    id: req.session.userId,
-    username: req.session.username!,
-    role: req.session.role!
+    id: decoded.userId,
+    username: decoded.username,
+    role: decoded.role
   };
 
   next();
