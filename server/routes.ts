@@ -255,7 +255,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Statistics endpoint
-  app.get("/api/stats", requireViewer, async (req, res) => {
+  app.get("/api/stats", requireAuth, requireViewer, async (req, res) => {
     try {
       const programmes = await storage.getProgrammes();
       const projets = await storage.getProjets();
