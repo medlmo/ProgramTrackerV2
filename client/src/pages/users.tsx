@@ -33,7 +33,9 @@ export default function Users() {
   const { data: users = [], isLoading } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
-      const response = await fetch("/api/users");
+      const response = await fetch("/api/users", {
+        credentials: 'include' as RequestCredentials
+      });
       if (!response.ok) throw new Error("Erreur lors du chargement des utilisateurs");
       return response.json();
     },
@@ -45,6 +47,7 @@ export default function Users() {
       const response = await fetch("/api/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: 'include' as RequestCredentials,
         body: JSON.stringify(userData)
       });
       if (!response.ok) {
@@ -67,7 +70,8 @@ export default function Users() {
   const deleteUserMutation = useMutation({
     mutationFn: async (userId: number) => {
       const response = await fetch(`/api/users/${userId}`, {
-        method: "DELETE"
+        method: "DELETE",
+        credentials: 'include' as RequestCredentials
       });
       if (!response.ok) {
         const error = await response.json();

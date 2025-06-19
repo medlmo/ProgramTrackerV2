@@ -2,6 +2,7 @@ import { Search, Plus, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useLocation } from "wouter";
+import { HeaderMenu } from "./header-menu";
 
 interface HeaderProps {
   title: string;
@@ -59,6 +60,7 @@ export default function Header({
               {addButtonText}
             </Button>
           )}
+          <HeaderMenu />
         </div>
       </div>
     </header>
