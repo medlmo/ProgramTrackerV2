@@ -70,6 +70,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const data = await response.json();
         localStorage.setItem('authToken', data.token);
         setUser(data.user);
+        // Force a re-render to update all components
+        window.location.reload();
         return true;
       }
       return false;
