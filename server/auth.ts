@@ -71,8 +71,6 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
   const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : req.cookies?.authToken;
   
-  // Removed debug logs for production
-  
   if (!token) {
     return res.status(401).json({ message: 'Authentification requise' });
   }
@@ -81,12 +79,12 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
   if (!decoded) {
     return res.status(401).json({ message: 'Token invalide' });
   }
+  
   (req as AuthenticatedRequest).user = {
     id: decoded.userId,
     username: decoded.username,
     role: decoded.role
   };
-
   next();
 }
 

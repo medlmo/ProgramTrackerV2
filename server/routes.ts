@@ -59,7 +59,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User management routes (admin only)
-  app.post("/api/users", requireAdmin, async (req, res) => {
+  app.post("/api/users", requireAuth, requireAdmin, async (req, res) => {
     try {
       const userData = insertUserSchema.parse(req.body);
       const passwordHash = await hashPassword(userData.password);
@@ -98,7 +98,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/users/:id", requireAdmin, async (req, res) => {
+  app.delete("/api/users/:id", requireAuth, requireAdmin, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const authReq = req as AuthenticatedRequest;
@@ -115,7 +115,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Programmes routes
-  app.get("/api/programmes", requireViewer, async (req, res) => {
+  app.get("/api/programmes", requireAuth, requireViewer, async (req, res) => {
     try {
       const programmes = await storage.getProgrammes();
       res.json(programmes);
@@ -137,7 +137,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/programmes", requireEditor, async (req, res) => {
+  app.post("/api/programmes", requireAuth, requireEditor, async (req, res) => {
     try {
       const validatedData = insertProgrammeSchema.parse(req.body);
       const programme = await storage.createProgramme(validatedData);
@@ -150,7 +150,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/programmes/:id", requireEditor, async (req, res) => {
+  app.put("/api/programmes/:id", requireAuth, requireEditor, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const validatedData = insertProgrammeSchema.partial().parse(req.body);
@@ -167,7 +167,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/programmes/:id", requireEditor, async (req, res) => {
+  app.delete("/api/programmes/:id", requireAuth, requireEditor, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const deleted = await storage.deleteProgramme(id);
@@ -181,7 +181,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Projets routes
-  app.get("/api/projets", requireViewer, async (req, res) => {
+  app.get("/api/projets", requireAuth, requireViewer, async (req, res) => {
     try {
       const { programmeId } = req.query;
       let projets;
@@ -211,7 +211,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/projets", requireEditor, async (req, res) => {
+  app.post("/api/projets", requireAuth, requireEditor, async (req, res) => {
     try {
       const validatedData = insertProjetSchema.parse(req.body);
       const projet = await storage.createProjet(validatedData);
@@ -224,7 +224,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/projets/:id", requireEditor, async (req, res) => {
+  app.put("/api/projets/:id", requireAuth, requireEditor, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const validatedData = insertProjetSchema.partial().parse(req.body);
@@ -241,7 +241,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/projets/:id", requireEditor, async (req, res) => {
+  app.delete("/api/projets/:id", requireAuth, requireEditor, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const deleted = await storage.deleteProjet(id);
