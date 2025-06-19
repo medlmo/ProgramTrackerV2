@@ -9,19 +9,16 @@ import { setupVite, serveStatic, log } from "./vite";
 const app = express();
 
 // Session configuration
-const PgSession = ConnectPgSimple(session);
 app.use(session({
-  store: new PgSession({
-    pool: pool,
-    tableName: 'session'
-  }),
   secret: process.env.SESSION_SECRET || 'your-secret-key-change-in-production',
-  resave: false,
+  resave: true,
   saveUninitialized: false,
+  name: 'connect.sid',
   cookie: {
     secure: false, // Set to true in production with HTTPS
     httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    sameSite: 'lax'
   }
 }));
 

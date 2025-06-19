@@ -52,7 +52,7 @@ export async function authenticateUser(username: string, password: string) {
 }
 
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
-  if (!req.session.userId) {
+  if (!req.session || !req.session.userId) {
     return res.status(401).json({ message: 'Authentification requise' });
   }
 

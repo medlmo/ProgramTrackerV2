@@ -34,6 +34,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Données invalides", errors: error.errors });
       }
+      console.error('Login error:', error);
       res.status(500).json({ message: "Erreur lors de la connexion" });
     }
   });
